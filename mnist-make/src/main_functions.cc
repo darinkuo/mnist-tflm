@@ -48,6 +48,9 @@ void setup() {
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
 
+  // Retreive the MNIST dataset
+  load_mnist();
+
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(mnist_model_data);
@@ -94,28 +97,26 @@ void setup() {
   input = interpreter->input(0);
   output = interpreter->output(0);
 
-  // Retreive the dataset
-  load_mnist();
 }
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
   // Get image from provider.
-  // int runs = 10;
-  // for(int i = 0; i < runs; ++i) {
-  //   for(int j = 0; j < kMaxImageSize; ++j){
-  //     input->data.uint8[i] = test_image_char[i][j];
-  //   }
-  //   // Run the model on this input and make sure it succeeds.
-  //   if (kTfLiteOk != interpreter->Invoke()) {
-  //     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
-  //   }
+  int runs = 10;
+  for(int i = 0; i < runs; ++i) {
+    for(int j = 0; j < kMaxImageSize; ++j){
+      input->data.uint8[i] = test_image_char[i][j];
+    }
+    // Run the model on this input and make sure it succeeds.
+    if (kTfLiteOk != interpreter->Invoke()) {
+      TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+    }
 
-  //   // Read the predicted value from the model's output tensor
-  //   TfLiteTensor* output = interpreter->output(0);
+    // Read the predicted value from the model's output tensor
+    TfLiteTensor* output = interpreter->output(0);
 
-  //   // Output the results. A custom HandleOutput function can be implemented
-  //   // for each supported hardware target.
-  //   HandleOutput(error_reporter, output->data.i32[0], test_label[i]);
-  // }
+    // Output the results. A custom HandleOutput function can be implemented
+    // for each supported hardware target.
+    HandleOutput(error_reporter, output->data.i32[0], test_label[i]);
+  }
 }

@@ -16,6 +16,5 @@ limitations under the License.
 #include "src/output_handler.h"
 
 void HandleOutput(tflite::ErrorReporter* error_reporter, int prediction, int label) {
-  // Log the current X and Y values
   TF_LITE_REPORT_ERROR(error_reporter, "Model estimates [%d] label [%d]\n", prediction, label);
 }
