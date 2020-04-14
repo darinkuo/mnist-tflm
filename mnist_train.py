@@ -1,50 +1,95 @@
-import os
-
 import tensorflow as tf
-import matplotlib.pyplot as plt
 
-mnist = tf.keras.datasets.mnist # 28x28 image of hand-written digits 0-9
+from tensorflow.keras.layers import Dense, Flatten, Conv2D
+from tensorflow.keras import Model
 
-# Seperate the training and testing datasets
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+mnist = tf.keras.datasets.mnist
 
-# retrieve the input dimensions and print the number of training and test data
-print(train_images.shape)
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train, x_test = x_train / 255.0, x_test / 255.0
 
-data_dim = (train_images[1], train_images[2])
+# Add a channels dimension
+x_train = x_train[..., tf.newaxis]
+x_test = x_test[..., tf.newaxis]
 
-# Normalize the training and test data
-train_images = tf.keras.utils.normalize(train_images, axis=1)
-test_images = tf.keras.utils.normalize(test_images, axis=1)
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
 
-# Use matplotlib to visualize testing data
-# plt.imshow(x_train[0], cmap = plt.cm.binary)
-# plt.show()
-# plt.imshow(x_test[0], cmap = plt.cm.binary)
-# plt.show()
+train_ds = tf.data.Dataset.from_tensor_slices(
+    (x_train, y_train)).shuffle(10000).batch(32)
 
-# Print the array representing the data
-# print(x_train[0])
-# print(x_test[0])
+test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 
-# Build the Model
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu)) 
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+class MyModel(Model):
+  def __init__(self):
+    super(MyModel, self).__init__()
+    self.conv1 = Conv2D(32, 3, activation='relu')
+    self.flatten = Flatten()
+    self.d1 = Dense(128, activation='relu')
+    self.d2 = Dense(10)
 
-model.compile(optimizer='adam',
-				loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-				metrics=['accuracy'])
+  def call(self, x):
+    x = self.conv1(x)
+    x = self.flatten(x)
+    x = self.d1(x)
+    return self.d2(x)
 
-# Feed the model training data
-model.fit(train_images, train_labels, epochs = 10)
+# Create an instance of the model
+model = MyModel()
 
-# Evaluate accuracy
-val_loss, val_acc = model.evaluate(test_images, test_labels)
-print(val_loss, val_acc)
+loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# Export the model to a SavedModel format for TFLite conversion
-save_path = os.path.dirname(os.path.realpath(__file__)) + "/models/number_guess_model"
-model.save(save_path, save_format='tf')
+optimizer = tf.keras.optimizers.Adam()
+
+train_loss = tf.keras.metrics.Mean(name='train_loss')
+train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+
+test_loss = tf.keras.metrics.Mean(name='test_loss')
+test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+
+@tf.function
+def train_step(images, labels):
+  with tf.GradientTape() as tape:
+    # training=True is only needed if there are layers with different
+    # behavior during training versus inference (e.g. Dropout).
+    predictions = model(images, training=True)
+    loss = loss_object(labels, predictions)
+  gradients = tape.gradient(loss, model.trainable_variables)
+  optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+  train_loss(loss)
+  train_accuracy(labels, predictions)
+
+@tf.function
+def test_step(images, labels):
+  # training=False is only needed if there are layers with different
+  # behavior during training versus inference (e.g. Dropout).
+  predictions = model(images, training=False)
+  t_loss = loss_object(labels, predictions)
+
+  test_loss(t_loss)
+  test_accuracy(labels, predictions)
+
+EPOCHS = 5
+
+for epoch in range(EPOCHS):
+  # Reset the metrics at the start of the next epoch
+  train_loss.reset_states()
+  train_accuracy.reset_states()
+  test_loss.reset_states()
+  test_accuracy.reset_states()
+
+  for images, labels in train_ds:
+    train_step(images, labels)
+
+  for test_images, test_labels in test_ds:
+    test_step(test_images, test_labels)
+
+  template = 'Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
+  print(template.format(epoch + 1,
+                        train_loss.result(),
+                        train_accuracy.result() * 100,
+                        test_loss.result(),
+                        test_accuracy.result() * 100))
+
+model.save('mnist_model')

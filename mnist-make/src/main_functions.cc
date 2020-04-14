@@ -19,6 +19,7 @@ limitations under the License.
 #include "src/model_settings.h"
 #include "src/mnist_reader.h"
 #include "src/model_data.h"
+#include "src/mnist_test_data.h"
 #include "tensorflow/lite/micro/kernels/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -36,9 +37,19 @@ int inference_count = 0;
 std::string mnist_data_location = "/data"; 
 // Create an area of memory to use for input, output, and intermediate arrays.
 // Finding the minimum value for your model may require some trial and error.
-constexpr int kTensorArenaSize = 1024 * 1024;
+constexpr int kTensorArenaSize = 5 * 1024;
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
+
+// Helper fn to log the shape and datatype of a tensor
+void printTensorDetails(TfLiteTensor* tensor,
+                        tflite::ErrorReporter* error_reporter) {
+  error_reporter->Report("Type [%s] Shape :", TfLiteTypeGetName(tensor->type));
+  for (int d = 0; d < tensor->dims->size; ++d) {
+    error_reporter->Report("%d [ %d]", d, tensor->dims->data[d]);
+  }
+  error_reporter->Report("");
+}
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
@@ -92,11 +103,44 @@ void setup() {
     TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
     return;
   }
-
-  // Obtain pointers to the model's input and output tensors.
+  // Get information about the models input and output tensors.
   input = interpreter->input(0);
+  error_reporter->Report("Details of input tensor:");
+  printTensorDetails(input, error_reporter);
   output = interpreter->output(0);
+  error_reporter->Report("Details of output tensor:");
+  printTensorDetails(output, error_reporter);
+  TF_LITE_REPORT_ERROR(error_reporter, "Allocation success\n");
 
+   int accurateCount = 0;
+  const int inputTensorSize = 28 * 28;
+  for (int s = 0; s < mnistSampleCount; ++s) {
+    // Set value of input tensor
+    for (int d = 0; d < inputTensorSize; ++d) {
+      input->data.f[d] = mnistInput[s][d];
+    }
+
+    // perform inference
+    TfLiteStatus invoke_status = interpreter->Invoke();
+    if (invoke_status != kTfLiteOk) {
+      error_reporter->Report("Invoke failed.\n");
+      return;
+    }
+
+    error_reporter->Report("Model estimate [%d] training label [%d]",
+                           output->data.i32[0], mnistOutput[s]);
+
+    if (output->data.i32[0] == mnistOutput[s]) {
+      ++accurateCount;
+    }
+  }
+
+  error_reporter->Report("Test set accuracy was %d percent\n",
+                         ((accurateCount * 100) / mnistSampleCount));
+
+  error_reporter->Report("MNIST classifier example completed successfully.\n");
+
+  return;
 }
 
 // The name of this function is important for Arduino compatibility.
@@ -105,18 +149,25 @@ void loop() {
   int runs = 10;
   for(int i = 0; i < runs; ++i) {
     for(int j = 0; j < kMaxImageSize; ++j){
-      input->data.uint8[i] = test_image_char[i][j];
+      input->data.f[j] = test_image[i][j];
     }
+    TF_LITE_REPORT_ERROR(error_reporter, "Pre-invoke success\n");
     // Run the model on this input and make sure it succeeds.
     if (kTfLiteOk != interpreter->Invoke()) {
       TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
     }
-
-    // Read the predicted value from the model's output tensor
-    TfLiteTensor* output = interpreter->output(0);
-
+    TF_LITE_REPORT_ERROR(error_reporter, "Post-invoke success\n");
+    // Iterate over the predicted values and print the largest probability
+    float Yhat_prob = 0;
+    int Yhat = 0;
+    for(int i = 0; i < kCategoryCount; i++) {
+      float tmp = output->data.f[i];
+      if(tmp > Yhat_prob) {
+        Yhat = i;
+      }
+    }
     // Output the results. A custom HandleOutput function can be implemented
     // for each supported hardware target.
-    HandleOutput(error_reporter, output->data.i32[0], test_label[i]);
+    HandleOutput(error_reporter, Yhat, test_label[i]);
   }
 }

@@ -1,11 +1,3 @@
-"""A simple script that exports a SavedModel into a TFLite Flatbuffer alongside the
-header and source files required to be included in a Tensorflow lite micro project.
-"""
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
 
@@ -32,7 +24,7 @@ def convert_to_flatbuffer(path, convert_name, quantized=False):
 def main(argv):
 	
 	# Determines name for converted model
-	tflite_model_name = 'converted_model'
+	tflite_model_name = 'mnist_model'
 	if(argv.o != None):
 		if(args.o.endswith('.tflite')):
 			tflite_model_name = argv.o[:-len('.tflite')]

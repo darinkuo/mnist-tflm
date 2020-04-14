@@ -37,8 +37,8 @@ unsigned char test_image_char[NUM_TEST][SIZE];
 unsigned char train_label_char[NUM_TRAIN][1];
 unsigned char test_label_char[NUM_TEST][1];
 
-double train_image[NUM_TRAIN][SIZE];
-double test_image[NUM_TEST][SIZE];
+float train_image[NUM_TRAIN][SIZE];
+float test_image[NUM_TEST][SIZE];
 int  train_label[NUM_TRAIN];
 int test_label[NUM_TEST];
 
@@ -88,12 +88,12 @@ void read_mnist_char(char *file_path, int num_data, int len_info, int arr_n, uns
 }
 
 
-void image_char2double(int num_data, unsigned char data_image_char[][SIZE], double data_image[][SIZE])
+void image_char2float(int num_data, unsigned char data_image_char[][SIZE], float data_image[][SIZE])
 {
     int i, j;
     for (i=0; i<num_data; i++)
         for (j=0; j<SIZE; j++)
-            data_image[i][j]  = (double)data_image_char[i][j] / 255.0;
+            data_image[i][j]  = (float)data_image_char[i][j] / 255.0;
 }
 
 
@@ -108,10 +108,10 @@ void label_char2int(int num_data, unsigned char data_label_char[][1], int data_l
 void load_mnist()
 {
     read_mnist_char(TRAIN_IMAGE, NUM_TRAIN, LEN_INFO_IMAGE, SIZE, (unsigned char *)train_image_char, info_image);
-    image_char2double(NUM_TRAIN, train_image_char, train_image);
+    image_char2float(NUM_TRAIN, train_image_char, train_image);
 
     read_mnist_char(TEST_IMAGE, NUM_TEST, LEN_INFO_IMAGE, SIZE, (unsigned char *)test_image_char, info_image);
-    image_char2double(NUM_TEST, test_image_char, test_image);
+    image_char2float(NUM_TEST, test_image_char, test_image);
     
     read_mnist_char(TRAIN_LABEL, NUM_TRAIN, LEN_INFO_LABEL, 1, (unsigned char *)train_label_char, info_label);
     label_char2int(NUM_TRAIN, train_label_char, train_label);
@@ -121,7 +121,7 @@ void load_mnist()
 }
 
 
-void print_mnist_pixel(double data_image[][SIZE], int num_data)
+void print_mnist_pixel(float data_image[][SIZE], int num_data)
 {
     int i, j;
     for (i=0; i<num_data; i++) {
@@ -178,7 +178,7 @@ void save_image(int n, char name[])
 
 // save mnist image (call for each image)
 // store train_image[][] into image[][][]
-void save_mnist_pgm(double data_image[][SIZE], int index)
+void save_mnist_pgm(float data_image[][SIZE], int index)
 {
     int n = 0; // id for image (set to 0)
     int x, y;
