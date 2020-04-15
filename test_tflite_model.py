@@ -7,9 +7,9 @@ mnist = tf.keras.datasets.mnist
 x_train, x_test = x_train / 255, x_test / 255
 
 # Add a channels dimension
-x_train = x_train[..., tf.newaxis]
+x_train = x_train[..., tf.newaxis].astype('float32')
 print(x_train[1:,:].shape)
-x_test = x_test[..., tf.newaxis]
+x_test = x_test[..., tf.newaxis].astype('float32')
 
 train_ds = tf.data.Dataset.from_tensor_slices(
     (x_train, y_train)).shuffle(10000).batch(32)
@@ -33,7 +33,7 @@ output_shape = output_details[0]['shape']
 print(f"Output shape: {output_shape}")
 input_data = x_test[1:2,:]
 print(input_data.shape)
-interpreter.set_tensor(input_details[0]['index'], np.array(np.array(input_data), dtype=np.float32))
+interpreter.set_tensor(input_details[0]['index'], input_data)
 
 interpreter.invoke()
 

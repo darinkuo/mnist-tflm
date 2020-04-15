@@ -37,13 +37,14 @@ int inference_count = 0;
 std::string mnist_data_location = "/data"; 
 // Create an area of memory to use for input, output, and intermediate arrays.
 // Finding the minimum value for your model may require some trial and error.
-constexpr int kTensorArenaSize = 5 * 1024;
+constexpr int kTensorArenaSize = 10 * 1024;
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
 // Helper fn to log the shape and datatype of a tensor
 void printTensorDetails(TfLiteTensor* tensor,
                         tflite::ErrorReporter* error_reporter) {
+  error_reporter->Report("Dims [%d] Size :", (tensor->dims->size));
   error_reporter->Report("Type [%s] Shape :", TfLiteTypeGetName(tensor->type));
   for (int d = 0; d < tensor->dims->size; ++d) {
     error_reporter->Report("%d [ %d]", d, tensor->dims->data[d]);
