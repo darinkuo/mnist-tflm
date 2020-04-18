@@ -26,6 +26,7 @@ constexpr int kNumChannels = 1;
 constexpr int kMaxImageSize = kNumCols * kNumRows * kNumChannels;
 
 constexpr int kCategoryCount = 10;
-extern const char* kCategoryLabels[kCategoryCount];
+
+constexpr int numInferences = 100;
 
 #endif  // SRC_MODEL_SETTINGS_H_

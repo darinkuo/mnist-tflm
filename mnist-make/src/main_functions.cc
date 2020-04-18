@@ -17,9 +17,8 @@ limitations under the License.
 
 #include "src/output_handler.h"
 #include "src/model_settings.h"
-#include "src/mnist_reader.h"
+#include "src/mnist_reader.hpp"
 #include "src/model_data.h"
-#include "src/mnist_test_data.h"
 #include "tensorflow/lite/micro/kernels/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -34,10 +33,11 @@ tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 TfLiteTensor* output = nullptr;
 int inference_count = 0;
-std::string mnist_data_location = "/data"; 
+std::string mnist_data_location = "/home/kuodm/research/tests/mnist/mnist-make"; 
+mnist::MNIST_dataset<std::vector, std::vector<uint8_t>, uint8_t> dataset;
 // Create an area of memory to use for input, output, and intermediate arrays.
 // Finding the minimum value for your model may require some trial and error.
-constexpr int kTensorArenaSize = 10 * 1024;
+constexpr int kTensorArenaSize = 90 * 1024;
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
@@ -61,7 +61,7 @@ void setup() {
   error_reporter = &micro_error_reporter;
 
   // Retreive the MNIST dataset
-  load_mnist();
+  dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(mnist_data_location);
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
@@ -111,64 +111,33 @@ void setup() {
   output = interpreter->output(0);
   error_reporter->Report("Details of output tensor:");
   printTensorDetails(output, error_reporter);
-  TF_LITE_REPORT_ERROR(error_reporter, "Allocation success\n");
-
-   int accurateCount = 0;
-  const int inputTensorSize = 28 * 28;
-  for (int s = 0; s < mnistSampleCount; ++s) {
-    // Set value of input tensor
-    for (int d = 0; d < inputTensorSize; ++d) {
-      input->data.f[d] = mnistInput[s][d];
-    }
-
-    // perform inference
-    TfLiteStatus invoke_status = interpreter->Invoke();
-    if (invoke_status != kTfLiteOk) {
-      error_reporter->Report("Invoke failed.\n");
-      return;
-    }
-
-    error_reporter->Report("Model estimate [%d] training label [%d]",
-                           output->data.i32[0], mnistOutput[s]);
-
-    if (output->data.i32[0] == mnistOutput[s]) {
-      ++accurateCount;
-    }
-  }
-
-  error_reporter->Report("Test set accuracy was %d percent\n",
-                         ((accurateCount * 100) / mnistSampleCount));
-
-  error_reporter->Report("MNIST classifier example completed successfully.\n");
-
   return;
 }
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
   // Get image from provider.
-  int runs = 10;
-  for(int i = 0; i < runs; ++i) {
+  for(int i = 0; i < numInferences; ++i){
     for(int j = 0; j < kMaxImageSize; ++j){
-      input->data.f[j] = test_image[i][j];
+      input->data.f[j] = dataset.test_images[i][j];
     }
-    TF_LITE_REPORT_ERROR(error_reporter, "Pre-invoke success\n");
+
     // Run the model on this input and make sure it succeeds.
     if (kTfLiteOk != interpreter->Invoke()) {
       TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
     }
-    TF_LITE_REPORT_ERROR(error_reporter, "Post-invoke success\n");
+
     // Iterate over the predicted values and print the largest probability
     float Yhat_prob = 0;
     int Yhat = 0;
-    for(int i = 0; i < kCategoryCount; i++) {
-      float tmp = output->data.f[i];
+    for(int j = 0; j < kCategoryCount; j++) {
+      float tmp = output->data.f[j];
       if(tmp > Yhat_prob) {
-        Yhat = i;
+        Yhat = j;
       }
     }
     // Output the results. A custom HandleOutput function can be implemented
     // for each supported hardware target.
-    HandleOutput(error_reporter, Yhat, test_label[i]);
+    HandleOutput(error_reporter, Yhat, dataset.test_labels[i]);
   }
 }

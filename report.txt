@@ -1,0 +1,3 @@
+gdb trace segfault back to being unable to reallocate the tensorshape of Convolutional Input/Filter Layer. If that's an issue for all Conv2D layers, that puts the project on hold.
+
+activation
