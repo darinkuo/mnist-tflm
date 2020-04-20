@@ -72,7 +72,7 @@ def rep_data_gen():
 # Converter flags and optimizations
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.target_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
 converter.inference_input_type = [tf.float32]
 converter.inference_output_type = [tf.int32]
 converter.representative_dataset=rep_data_gen
