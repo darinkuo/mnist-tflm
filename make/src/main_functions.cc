@@ -63,11 +63,9 @@ void setup() {
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
 
-  TF_LITE_REPORT_ERROR(error_reporter, "Retrieving dataset");
   // Retreive the MNIST dataset
   dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(mnist_data_location);
 
-  TF_LITE_REPORT_ERROR(error_reporter, "Retrieving model");
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(mnist_model_data);
@@ -98,13 +96,11 @@ void setup() {
   // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_AVERAGE_POOL_2D,
   //                              tflite::ops::micro::Register_AVERAGE_POOL_2D());
 
-  TF_LITE_REPORT_ERROR(error_reporter, "Building interpreter");
   // Build an interpreter to run the model with.
   static tflite::MicroInterpreter static_interpreter(
       model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
-  TF_LITE_REPORT_ERROR(error_reporter, "Allocating tensors");
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
   if (allocate_status != kTfLiteOk) {

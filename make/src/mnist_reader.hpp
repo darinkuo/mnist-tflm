@@ -354,12 +354,10 @@ template <template <typename...> class Container, typename Image, typename Label
 MNIST_dataset<Container, Image, Label> read_dataset_direct(const std::string& folder, std::size_t training_limit = 0, std::size_t test_limit = 0) {
     MNIST_dataset<Container, Image, Label> dataset;
 
-    //dataset.training_images = read_training_images<Container, Image>(folder, training_limit, [] { return Image(1 * 28 * 28); });
-    //dataset.training_labels = read_training_labels<Container, Label>(folder, training_limit);
+    dataset.training_images = read_training_images<Container, Image>(folder, training_limit, [] { return Image(1 * 28 * 28); });
+    dataset.training_labels = read_training_labels<Container, Label>(folder, training_limit);
 
-    std::cout << "reading test images" << std::endl;
     dataset.test_images = read_test_images<Container, Image>(folder, test_limit, [] { return Image(1 * 28 * 28); });
-    std::cout << "reading test labels" << std::endl;
     dataset.test_labels = read_test_labels<Container, Label>(folder, test_limit);
 
     return dataset;

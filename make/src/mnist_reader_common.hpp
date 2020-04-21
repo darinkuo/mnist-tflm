@@ -36,7 +36,6 @@ inline uint32_t read_header(const std::unique_ptr<char[]>& buffer, size_t positi
 inline std::unique_ptr<char[]> read_mnist_file(const std::string& path, uint32_t key) {
     std::ifstream file;
     file.open(path, std::ios::in | std::ios::binary | std::ios::ate);
-    std::cout << "reading file" << std::endl;
     
     if (!file) {
         std::cout << "Error opening file" << std::endl;

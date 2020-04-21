@@ -1,5 +1,5 @@
-CXX = riscv64-unknown-linux-gnu-g++
-CC  = riscv64-unknown-linux-gnu-gcc
+CXX = g++ #riscv64-unknown-elf-g++ #linux-gnu-g++
+CC  = gcc #riscv64-unknown-elf-gcc #linux-gnu-gcc
 RM  = rm -f
 
 # Required Tensorflow Lite files to compile the binary
@@ -25,11 +25,11 @@ LDFLAGS +=  -lm
 %.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
-mnist_inference : $(OBJS)
+mnist_inference.out : $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
-all: mnist_inference
+all: mnist_inference.out
 
 clean:
 	-$(RM) $(OBJS)
-	-$(RM) mnist_inference
+	-$(RM) mnist_inference.out
