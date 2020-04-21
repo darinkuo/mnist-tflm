@@ -1,5 +1,5 @@
-CXX = g++ #riscv64-unknown-elf-g++ #linux-gnu-g++
-CC  = gcc #riscv64-unknown-elf-gcc #linux-gnu-gcc
+CXX = riscv64-unknown-elf-linux-gnu-g++
+CC  = riscv64-unknown-elf-linux-gnu-gcc
 RM  = rm -f
 
 # Required Tensorflow Lite files to compile the binary
