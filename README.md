@@ -47,6 +47,6 @@ Model estimates [1] label [1]
 ```
 
 ### Based Off Of
-* [MNIST classifcation Example] (https://github.com/PeteBlackerThe3rd/tensorflow/tree/master/tensorflow/lite/micro/examples/micro_mnist)
-* [Hello World Example] (https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/hello_world)
-* [Simple C++ Reader for MNIST dataset] (https://github.com/wichtounet/mnist)
+* [MNIST classifcation Example](https://github.com/PeteBlackerThe3rd/tensorflow/tree/master/tensorflow/lite/micro/examples/micro_mnist)
+* [Hello World Example](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/hello_world)
+* [Simple C++ Reader for MNIST dataset](https://github.com/wichtounet/mnist)
