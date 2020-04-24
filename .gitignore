@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
+.idea
 # C/C++ Object files
 *.o
 

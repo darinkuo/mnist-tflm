@@ -1,10 +1,8 @@
 import os
 
 import tensorflow as tf
-import numpy as np
-from tensorflow.keras.layers import Dense, Flatten, Conv2D
-from tensorflow.keras import Model
-import flatbuffer_2_tfl_micro as save_tflm
+
+from utils import rep_data_gen, write_tf_lite_micro_model
 
 mnist = tf.keras.datasets.mnist
 
@@ -33,11 +31,11 @@ model.compile(optimizer=tf.keras.optimizers.Adam(),
               loss=tf.keras.losses.CategoricalCrossentropy(),
               metrics=['accuracy'])
 
-model.fit(x_train, 
+model.fit(x_train,
           y_train,
           batch_size=32,
           epochs=2,
-          validation_data=(x_test,y_test))
+          validation_data=(x_test, y_test))
 
 score = model.evaluate(x_test, y_test, verbose=0)
 # Print test accuracy
@@ -55,33 +53,19 @@ if not os.path.exists('model'):
 model.save('model/mnist-model.h5')
 
 print("Model saved...")
-
-# Convert the model to TFLite
 print("Converting to TFLite Flatbuffer...")
-
-# Generate representative data for the optimizer to check against
-def rep_data_gen():
-    a = []
-    for i in range(x_test.shape[0]):
-        a.append(x_test[i])
-    a = np.array(a)
-    img = tf.data.Dataset.from_tensor_slices(a).batch(1)
-    for i in img.take(1):
-        yield [i]
-
 # Converter flags and optimizations
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.target_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
 converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
-converter.inference_input_type = [tf.float32]
-converter.inference_output_type = [tf.int32]
-converter.representative_dataset=rep_data_gen
+converter.inference_input_type = tf.uint8
+converter.inference_output_type = tf.uint8
+converter.representative_dataset = lambda: rep_data_gen(x_test)
 tflite_quant_model = converter.convert()
 
 # Save the flatbuffer
 with open('model/mnist_quant.tflite', "wb") as f:
-		f.write(tflite_quant_model)
+    f.write(tflite_quant_model)
 
 # Generate the C header and source file
-save_tflm.write_tf_lite_micro_model(tflite_quant_model, 
-										data_variable_name="mnist_model_data")
+write_tf_lite_micro_model(tflite_quant_model, data_variable_name="mnist_model_data")

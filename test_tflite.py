@@ -1,4 +1,3 @@
-import numpy as np
 import tensorflow as tf
 
 mnist = tf.keras.datasets.mnist
@@ -8,7 +7,7 @@ x_train, x_test = x_train / 255, x_test / 255
 
 # Add a channels dimension
 x_train = x_train[..., tf.newaxis].astype('float32')
-print(x_train[1:,:].shape)
+print(x_train[1:, :].shape)
 x_test = x_test[..., tf.newaxis].astype('float32')
 
 train_ds = tf.data.Dataset.from_tensor_slices(
@@ -31,7 +30,7 @@ input_shape = input_details[0]['shape']
 print(f"Input shape: {input_shape}")
 output_shape = output_details[0]['shape']
 print(f"Output shape: {output_shape}")
-input_data = x_test[1:2,:]
+input_data = x_test[1:2, :]
 print(input_data.shape)
 interpreter.set_tensor(input_details[0]['index'], input_data)
 
