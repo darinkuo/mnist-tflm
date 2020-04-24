@@ -1,0 +1,12 @@
+[submodule "third_party/mnist_reader"]
+	path = third_party/mnist_reader
+	url = https://github.com/wichtounet/mnist
+[submodule "third_party/kissfft"]
+	path = third_party/kissfft
+	url = https://github.com/mborgerding/kissfft
+[submodule "third_party/gemmlowp"]
+	path = third_party/gemmlowp
+	url = https://github.com/google/gemmlowp
+[submodule "third_party/flatbuffers"]
+	path = third_party/flatbuffers
+	url = https://github.com/google/flatbuffers

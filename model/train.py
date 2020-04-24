@@ -50,7 +50,7 @@ print("Saving modeling in path mnist-model...")
 if not os.path.exists('model'):
     os.mkdir('model')
 
-model.save('mnist-model.h5')
+model.save('mnist_model.h5')
 
 print("Model saved...")
 print("Converting to TFLite Flatbuffer...")
