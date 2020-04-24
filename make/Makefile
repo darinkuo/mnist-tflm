@@ -14,8 +14,8 @@ $(TF_SRCS) src/main.cc src/main_functions.cc src/model_data.cc src/output_handle
 OBJS := \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
 
-CXXFLAGS += -g --static -std=c++11 -DTF_LITE_STATIC_MEMORY -O3 -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/kissfft
-CCFLAGS +=  -g --static -std=c11   -DTF_LITE_STATIC_MEMORY -O3 -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/kissfft
+CXXFLAGS += -g  -static -std=c++11 -DTF_LITE_STATIC_MEMORY -O3 -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/kissfft
+CCFLAGS +=  -g  -static -std=c11   -DTF_LITE_STATIC_MEMORY -O3 -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/kissfft
 
 LDFLAGS +=  -lm
 

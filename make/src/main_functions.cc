@@ -35,7 +35,7 @@ TfLiteTensor* output = nullptr;
 int inference_count = 0;
 
 // Need to modify if unable to open the files
-std::string mnist_data_location = "/home/kuodm/research/tests/mnist/make/"; 
+std::string mnist_data_location = "/home/tylee/development/mnist-tflm/make";
 
 mnist::MNIST_dataset<std::vector, std::vector<uint8_t>, uint8_t> dataset;
 // Create an area of memory to use for input, output, and intermediate arrays.
@@ -64,10 +64,12 @@ void setup() {
   error_reporter = &micro_error_reporter;
 
   // Retreive the MNIST dataset
+  error_reporter->Report("Retreiving the MNIST dataset");
   dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(mnist_data_location);
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
+  error_reporter->Report("tflite::GetModel");
   model = tflite::GetModel(mnist_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
