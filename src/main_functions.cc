@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "src/output_handler.h"
 #include "src/model_settings.h"
-#include "src/mnist_reader.hpp"
+#include "mnist/mnist_reader.hpp"
 #include "src/model_data.h"
 #include "tensorflow/lite/micro/kernels/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
