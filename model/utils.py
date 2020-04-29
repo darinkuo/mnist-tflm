@@ -26,7 +26,7 @@ Source: https://github.com/PeteBlackerThe3rd/tensorflow/blob/master/tensorflow/l
 def write_tf_lite_micro_model(flatbuffer,
                               base_file_name="model_data",
                               data_variable_name="",
-                              header_comment=None, directory=Path("make/src")):
+                              header_comment=None, directory=Path("src")):
     """
     Method to generate a .h and .cc file containing a string literal and length
     definition of the given tflite flatbuffer. Used to automatically generate
