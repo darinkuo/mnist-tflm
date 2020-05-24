@@ -20,6 +20,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/micro_allocator.h"
 #include "tensorflow/lite/micro/micro_optional_debug_tools.h"
+#ifdef GEM5
+  #include </home/dkuo/gem5/include/gem5/m5ops.h>
+#endif
 
 namespace tflite {
 namespace {
@@ -241,7 +244,13 @@ TfLiteStatus MicroInterpreter::Invoke() {
     auto* registration = node_and_registrations_[i].registration;
 
     if (registration->invoke) {
+      #ifdef GEM5
+        m5_reset_stats(1,0);
+      #endif
       TfLiteStatus invoke_status = registration->invoke(&context_, node);
+      #ifdef GEM5
+        m5_dump_stats(1,0);
+      #endif
       if (invoke_status == kTfLiteError) {
         TF_LITE_REPORT_ERROR(
             error_reporter_,

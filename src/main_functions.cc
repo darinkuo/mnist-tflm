@@ -24,6 +24,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
+#ifdef GEM5
+  #include </home/dkuo/gem5/include/gem5/m5ops.h>
+#endif
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
@@ -35,7 +38,7 @@ TfLiteTensor* output = nullptr;
 int inference_count = 0;
 
 // Need to modify if unable to open the files
-std::string mnist_data_location = "<workspace path>/mnist-tflm/third_party/mnist_reader";
+std::string mnist_data_location = "/home/dkuo/dev/mnist-tflm/third_party/mnist_reader";
 
 mnist::MNIST_dataset<std::vector, std::vector<uint8_t>, uint8_t> dataset;
 // Create an area of memory to use for input, output, and intermediate arrays.
@@ -45,15 +48,17 @@ uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
 // Helper fn to log the shape and datatype of a tensor
-void printTensorDetails(TfLiteTensor* tensor,
-                        tflite::ErrorReporter* error_reporter) {
-  error_reporter->Report("Dims [%d] Size :", (tensor->dims->size));
-  error_reporter->Report("Type [%s] Shape :", TfLiteTypeGetName(tensor->type));
-  for (int d = 0; d < tensor->dims->size; ++d) {
-    error_reporter->Report("%d [ %d]", d, tensor->dims->data[d]);
+#ifdef DEBUG
+  void printTensorDetails(TfLiteTensor* tensor,
+                          tflite::ErrorReporter* error_reporter) {
+    error_reporter->Report("Dims [%d] Size :", (tensor->dims->size));
+    error_reporter->Report("Type [%s] Shape :", TfLiteTypeGetName(tensor->type));
+    for (int d = 0; d < tensor->dims->size; ++d) {
+      error_reporter->Report("%d [ %d]", d, tensor->dims->data[d]);
+    }
+    error_reporter->Report("");
   }
-  error_reporter->Report("");
-}
+#endif
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
@@ -64,8 +69,11 @@ void setup() {
   error_reporter = &micro_error_reporter;
 
   // Retreive the MNIST dataset
-  error_reporter->Report("Retreiving the MNIST dataset\n");
-  dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(mnist_data_location);
+  #ifdef DEBUG
+    error_reporter->Report("Retreiving the MNIST dataset\n");
+  #endif
+  /* Read 1 training element and numInferences test */
+  dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(mnist_data_location, 1, numInferences);
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
@@ -108,13 +116,15 @@ void setup() {
     TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
     return;
   }
-  // Get information about the models input and output tensors.
+  //Get information about the models input and output tensors.
   input = interpreter->input(0);
-  error_reporter->Report("Details of input tensor:");
-  printTensorDetails(input, error_reporter);
   output = interpreter->output(0);
-  error_reporter->Report("Details of output tensor:");
-  printTensorDetails(output, error_reporter);
+  #ifdef DEBUG
+    error_reporter->Report("Details of input tensor:");
+    printTensorDetails(input, error_reporter);
+    error_reporter->Report("Details of output tensor:");
+    printTensorDetails(output, error_reporter);
+  #endif
   return;
 }
 
