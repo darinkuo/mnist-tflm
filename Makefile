@@ -19,10 +19,10 @@ M5FLAGS = -I./../../gem5/include/
 
 CXXFLAGS += -g -static -std=c++11 -DTF_LITE_STATIC_MEMORY -O3 -I./ -I./third_party/gemmlowp \
 -I./third_party/flatbuffers/include -I./third_party/kissfft -I./third_party/mnist_reader/include $(M5FLAGS) \
-#-DGEM5
+-DGEM5
 CCFLAGS +=  -g  -static -std=c11   -DTF_LITE_STATIC_MEMORY -O3 -I./ -I./third_party/gemmlowp \
 -I./third_party/flatbuffers/include -I./third_party/kissfft -I./third_party/mnist_reader/include $(M5FLAGS) \
-#-DGEM5
+-DGEM5
 
 LDFLAGS +=  -lm
 
