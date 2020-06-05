@@ -22,8 +22,8 @@ y_test = tf.keras.utils.to_categorical(y_test, 10)
 # Create an instance of the model
 model = tf.keras.Sequential([
     tf.keras.layers.Conv2D(64, 3, activation=tf.nn.relu, input_shape=(28, 28, 1)),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
     tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation=tf.nn.relu),
     tf.keras.layers.Dense(10, activation=tf.nn.softmax),
 ])
 
@@ -50,7 +50,7 @@ print("Saving modeling in path mnist-model...")
 if not os.path.exists('model'):
     os.mkdir('model')
 
-model.save('mnist_model.h5')
+model.save('model/mnist_model.h5')
 
 print("Model saved...")
 print("Converting to TFLite Flatbuffer...")
