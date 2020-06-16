@@ -45,7 +45,7 @@ make
 
 Run inference
 ```
-./mnist_inference
+./mnist_inference.out
 ```
 
 ### Expected Output
